@@ -81,4 +81,14 @@ val CoolGold = Color(0xFFACB78E)
 val PlatinumGold = Color(0xFFC5B358)
 val MistyGold = Color(0xFFCFD4C5)
 
+val SoftWhite = Color(0xFFFFFFFF)  // Blanco puro
+val OffWhite = Color(0xFFF8F8F8)    // Blanco ligeramente gris
+val AntiqueWhite = Color(0xFFFAEBD7) // Blanco antiguo
+val Snow = Color(0xFFFFFAFA)        // Blanco nieve
+val Ivory = Color(0xFFFFFFF0)       // Marfil
+val FloralWhite = Color(0xFFFFFAF0) // Blanco floral
+val GhostWhite = Color(0xFFF8F8FF)  // Blanco fantasma
+val Seashell = Color(0xFFFFF5EE)    // Concha marina
+val LavenderBlush = Color(0xFFFFF0F5) // Rubor lavanda
+val LemonChiffon = Color(0xFFFFFACD) // Chiffón de limón
 

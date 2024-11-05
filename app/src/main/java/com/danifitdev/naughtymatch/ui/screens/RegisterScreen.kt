@@ -1,7 +1,5 @@
 package com.danifitdev.naughtymatch.ui.screens
 
-import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -42,8 +40,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -52,15 +48,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.danifitdev.naughtymatch.R
 import com.danifitdev.naughtymatch.ui.viewmodel.LoginViewModel
 import com.danifitdev.naughtymatch.showToast
-import com.danifitdev.naughtymatch.ui.theme.Black
-import com.danifitdev.naughtymatch.ui.theme.LightBlue
-import com.danifitdev.naughtymatch.ui.theme.LightSlateGray
-import com.danifitdev.naughtymatch.ui.theme.PinkLight
-import com.danifitdev.naughtymatch.ui.theme.TextColor
 import com.danifitdev.naughtymatch.ui.theme.White
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.gson.Gson
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

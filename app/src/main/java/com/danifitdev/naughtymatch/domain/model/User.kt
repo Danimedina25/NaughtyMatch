@@ -1,10 +1,11 @@
 package com.danifitdev.naughtymatch.domain.model
 
 data class User(
-    val id: Int,
-    val nombre: String,
-    val correo: String,
-    val telefono: String,
-    val foto_perfil: String,
-    val fecha_nac: String
+    var id: String = "",
+    var nombre: String? = "",
+    var correo: String? = "",
+    var telefono: String = "",
+    var foto_perfil: String? = "",
+    var fecha_nac: String = "",
+    var genero: String = ""
 )

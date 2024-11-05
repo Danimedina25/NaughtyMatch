@@ -122,5 +122,6 @@ dependencies {
 
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("com.google.code.gson:gson:2.8.9")
 
 }

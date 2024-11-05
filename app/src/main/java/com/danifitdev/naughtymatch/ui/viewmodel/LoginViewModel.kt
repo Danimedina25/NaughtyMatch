@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.danifitdev.naughtymatch.domain.model.User
 import com.danifitdev.naughtymatch.domain.usecases.LoginWithEmailUseCase
 import com.danifitdev.naughtymatch.domain.usecases.LoginWithFacebookUseCase
 import com.danifitdev.naughtymatch.domain.usecases.RegisterWithEmailUseCase
@@ -39,8 +40,8 @@ class LoginViewModel @Inject constructor(
         _isLoading.value = loading
     }
 
-    private val _user = MutableStateFlow<FirebaseUser?>(null)
-    val user: StateFlow<FirebaseUser?> get() = _user
+    private val _user = MutableStateFlow<User?>(null)
+    val user: StateFlow<User?> get() = _user
 
     private val _errorMessage = MutableStateFlow<String?>("")
     val errorMessage: StateFlow<String?> get() = _errorMessage
@@ -58,6 +59,8 @@ class LoginViewModel @Inject constructor(
             if (result.isSuccess) {
                 _isLoading.value = false
                 userPreferencesRepository.setLoggedIn(true)
+                _user.value = result.getOrNull()
+                _user.value?.let { userPreferencesRepository.saveUser(it) }
             } else {
                 _isLoading.value = false
                 _errorMessage.value = result.exceptionOrNull()?.message
@@ -86,6 +89,8 @@ class LoginViewModel @Inject constructor(
             if (result.isSuccess) {
                 _isLoading.value = false
                 userPreferencesRepository.setLoggedIn(true)
+                _user.value = result.getOrNull()
+                _user.value?.let { userPreferencesRepository.saveUser(it) }
             } else {
                 _isLoading.value = false
                 _errorMessage.value = result.exceptionOrNull()?.message

@@ -33,7 +33,7 @@ private val LightColorScheme = lightColorScheme(
     onSecondary = SlateGray,   // Texto en Negro intenso sobre el secundario
     onTertiary = IntenseBlack,    // Texto en Negro intenso sobre el terciario
     onBackground = IntenseBlack,  // Texto en Negro intenso sobre el fondo
-    onSurface = PlatinumGold       // Texto en Negro intenso sobre la superficie
+    onSurface = DeepRed       // Texto en Negro intenso sobre la superficie
 )
 
 @Composable

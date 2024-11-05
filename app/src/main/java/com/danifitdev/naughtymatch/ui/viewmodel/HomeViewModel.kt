@@ -2,6 +2,7 @@ package com.danifitdev.naughtymatch.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.danifitdev.naughtymatch.domain.model.User
 import com.danifitdev.naughtymatch.utils.UserPreferencesRepository
 import com.facebook.login.LoginManager
 import com.google.firebase.auth.FirebaseAuth
@@ -27,16 +28,12 @@ class HomeViewModel @Inject constructor(
         _isLoading.value = loading
     }
 
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    private val _currentUser = MutableStateFlow<FirebaseUser?>(auth.currentUser)
-    val currentUser: StateFlow<FirebaseUser?> get() = _currentUser
-
     val isLoggedIn: StateFlow<Boolean> = userPreferencesRepository.isLoggedIn
         .stateIn(viewModelScope, SharingStarted.Lazily, false)
 
-    fun refreshUser() {
-        _currentUser.value = auth.currentUser
-    }
+    val currentUser: StateFlow<User?> = userPreferencesRepository.user
+        .stateIn(viewModelScope, SharingStarted.Lazily, User())
+
 
     fun logout() {
         viewModelScope.launch {

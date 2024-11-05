@@ -30,6 +30,8 @@ import androidx.navigation.NavController
 import com.danifitdev.naughtymatch.R
 import com.danifitdev.naughtymatch.ui.viewmodel.HomeViewModel
 import androidx.compose.material3.MaterialTheme
+import com.danifitdev.naughtymatch.domain.model.User
+import com.danifitdev.naughtymatch.ui.screens.modals.ProfileScreenModal
 import com.danifitdev.naughtymatch.ui.theme.White
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -37,6 +39,7 @@ import com.danifitdev.naughtymatch.ui.theme.White
 fun HomeScreen(navController: NavController,
                onNavigateToLogin:()->Unit, homeViewModel: HomeViewModel = hiltViewModel()) {
     val isLogged by homeViewModel.isLoggedIn.collectAsState(initial = true)
+    val user by homeViewModel.currentUser.collectAsState()
 
     LaunchedEffect(isLogged) {
         if(!isLogged){
@@ -45,21 +48,20 @@ fun HomeScreen(navController: NavController,
     }
     Scaffold(
         topBar = {
-            com.danifitdev.naughtymatch.ui.screens.modals.TopBarWithGradient(homeViewModel)
+            TopBar(homeViewModel, user!!)
         }
     ) { innerPadding ->
-        com.danifitdev.naughtymatch.ui.screens.modals.ProfileSection(
+         ProfileSection(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(WindowInsets.statusBars.asPaddingValues()), homeViewModel
+                .padding(WindowInsets.statusBars.asPaddingValues()), homeViewModel,
+             user!!
         )
     }
 }
 
 @Composable
-fun ProfileSection(modifier: Modifier, homeViewModel: HomeViewModel) {
-    val user by homeViewModel.currentUser.collectAsState()
-
+fun ProfileSection(modifier: Modifier, homeViewModel: HomeViewModel, user: User) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -79,18 +81,19 @@ fun ProfileSection(modifier: Modifier, homeViewModel: HomeViewModel) {
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Text("user!!.email}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Text(user.nombre!!, fontSize = 18.sp, fontWeight = FontWeight.Bold)
     }
 }
 
 @Composable
-fun TopBarWithGradient(homeViewmodel: HomeViewModel) {
+fun TopBar(homeViewmodel: HomeViewModel, user: User) {
     var expanded by remember { mutableStateOf(false) }
+    var showDialogPerfil by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.background
             )
             .padding(WindowInsets.statusBars.asPaddingValues())
     ) {
@@ -102,18 +105,18 @@ fun TopBarWithGradient(homeViewmodel: HomeViewModel) {
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Bienvenido", style = MaterialTheme.typography.titleLarge, color = White)
+                    Text(text = "Bienvenido", style = MaterialTheme.typography.titleLarge, color =  MaterialTheme.colorScheme.onPrimary)
                 }
             },
             navigationIcon = {
 
-                IconButton(onClick = {}) {
-                    Icon(Icons.Filled.Person, contentDescription = "Perfil", tint = White)
+                IconButton(onClick = {showDialogPerfil = true}) {
+                    Icon(Icons.Filled.Person, contentDescription = "Perfil", tint =  MaterialTheme.colorScheme.onPrimary)
                 }
             },
             actions = {
                 IconButton(onClick = { expanded = !expanded }) {
-                    Icon(Icons.Filled.Settings, contentDescription = "Configuraciones", tint = White)
+                    Icon(Icons.Filled.Settings, contentDescription = "Configuraciones", tint =  MaterialTheme.colorScheme.onPrimary)
                 }
                 DropdownMenu(
                     expanded = expanded,
@@ -136,6 +139,7 @@ fun TopBarWithGradient(homeViewmodel: HomeViewModel) {
             backgroundColor = Color.Transparent,
             elevation = 0.dp
         )
+        ProfileScreenModal(showDialog = showDialogPerfil, onDismiss = { showDialogPerfil = false }, user)
     }
 }
 
