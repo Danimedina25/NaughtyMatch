@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "716833796898",
+    "project_id": "naughty-match-app",
+    "storage_bucket": "naughty-match-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:716833796898:android:1d62ddd54f5fe3350e6b7b",
+        "android_client_info": {
+          "package_name": "com.danifitdev.naughtymatch"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCs1Om2Oy8HQysVjA23yGAdp976m4ikGvQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
