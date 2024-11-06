@@ -14,12 +14,14 @@ import com.danifitdev.naughtymatch.utils.AuthState
 import com.danifitdev.naughtymatch.utils.UserPreferencesRepository
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.FirebaseDatabase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.util.regex.Pattern
 import javax.inject.Inject
 
@@ -52,6 +54,12 @@ class LoginViewModel @Inject constructor(
     private val _registroExitoso= MutableStateFlow(false)
     val registroExitoso: StateFlow<Boolean> = _registroExitoso
 
+    fun saveUser(user: User){
+        viewModelScope.launch {
+            userPreferencesRepository.saveUser(user)
+        }
+    }
+
     fun loginWithEmail(email: String, password: String) {
         _isLoading.value = true
         viewModelScope.launch {
@@ -60,7 +68,7 @@ class LoginViewModel @Inject constructor(
                 _isLoading.value = false
                 userPreferencesRepository.setLoggedIn(true)
                 _user.value = result.getOrNull()
-                _user.value?.let { userPreferencesRepository.saveUser(it) }
+                _user.value?.let { saveUser(it) }
             } else {
                 _isLoading.value = false
                 _errorMessage.value = result.exceptionOrNull()?.message
@@ -90,7 +98,7 @@ class LoginViewModel @Inject constructor(
                 _isLoading.value = false
                 userPreferencesRepository.setLoggedIn(true)
                 _user.value = result.getOrNull()
-                _user.value?.let { userPreferencesRepository.saveUser(it) }
+                _user.value?.let { saveUser(it) }
             } else {
                 _isLoading.value = false
                 _errorMessage.value = result.exceptionOrNull()?.message

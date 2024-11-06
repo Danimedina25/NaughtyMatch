@@ -31,8 +31,7 @@ import com.danifitdev.naughtymatch.R
 import com.danifitdev.naughtymatch.ui.viewmodel.HomeViewModel
 import androidx.compose.material3.MaterialTheme
 import com.danifitdev.naughtymatch.domain.model.User
-import com.danifitdev.naughtymatch.ui.screens.modals.ProfileScreenModal
-import com.danifitdev.naughtymatch.ui.theme.White
+import com.danifitdev.naughtymatch.ui.screens.modals.PerfilScreenModal
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -105,7 +104,8 @@ fun TopBar(homeViewmodel: HomeViewModel, user: User) {
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Bienvenido", style = MaterialTheme.typography.titleLarge, color =  MaterialTheme.colorScheme.onPrimary)
+                    Text(text = "Bienvenido", style = MaterialTheme.typography.titleLarge,
+                        color =  MaterialTheme.colorScheme.onPrimary, fontSize = 16.sp)
                 }
             },
             navigationIcon = {
@@ -139,7 +139,7 @@ fun TopBar(homeViewmodel: HomeViewModel, user: User) {
             backgroundColor = Color.Transparent,
             elevation = 0.dp
         )
-        ProfileScreenModal(showDialog = showDialogPerfil, onDismiss = { showDialogPerfil = false }, user)
+        PerfilScreenModal(showDialog = showDialogPerfil, onDismiss = { showDialogPerfil = false }, user)
     }
 }
 

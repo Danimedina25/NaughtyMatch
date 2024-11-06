@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,6 +42,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -74,7 +76,7 @@ fun LoginScreen(
     }
 
     LaunchedEffect(errorMessage) {
-        if(errorMessage!!.isNotEmpty()){
+        if(!errorMessage.isNullOrEmpty()){
             showToast(context, errorMessage!!)
             loginViewModel.limpiarMensajeError()
         }
@@ -111,6 +113,9 @@ fun LoginScreen(
                  modifier = Modifier.fillMaxWidth(),
                  shape = RoundedCornerShape(16.dp),
                  singleLine = true,
+                 keyboardOptions = KeyboardOptions.Default.copy(
+                     imeAction = ImeAction.Next // Acción de siguiente en el teclado
+                 ),
                  textStyle = TextStyle(color = MaterialTheme.colorScheme.onSecondary, fontSize = 16.sp),
                  colors = TextFieldDefaults.textFieldColors(
                      containerColor = MaterialTheme.colorScheme.surface,
@@ -163,7 +168,7 @@ fun LoginScreen(
 
                  Button(
                      onClick = {
-                         loginViewModel.validarDatos(email, password)},
+                         loginViewModel.validarDatos(email.trim(), password.trim())},
                      modifier = Modifier
                          .fillMaxWidth()
                          .height(50.dp),

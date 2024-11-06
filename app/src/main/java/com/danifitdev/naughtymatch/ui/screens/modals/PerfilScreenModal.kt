@@ -1,9 +1,15 @@
 package com.danifitdev.naughtymatch.ui.screens.modals
 
+import android.net.Uri
+import android.provider.MediaStore
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,24 +17,26 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material3.Icon
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -41,35 +49,47 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import coil.compose.rememberImagePainter
+import com.danifitdev.naughtymatch.R
 import com.danifitdev.naughtymatch.domain.model.User
+import com.danifitdev.naughtymatch.showToast
 import com.danifitdev.naughtymatch.ui.theme.Black
 import com.danifitdev.naughtymatch.ui.theme.DeepRed
 import com.danifitdev.naughtymatch.ui.theme.SlateGray
 import com.danifitdev.naughtymatch.ui.theme.GhostWhite
 import com.danifitdev.naughtymatch.ui.theme.White
+import com.danifitdev.naughtymatch.ui.theme.WineRed
+import com.danifitdev.naughtymatch.ui.viewmodel.HomeViewModel
+import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun ProfileScreenModal(showDialog: Boolean, onDismiss: () -> Unit, user: User) {
+fun PerfilScreenModal(showDialog: Boolean, onDismiss: () -> Unit, user: User, homeViewModel: HomeViewModel = hiltViewModel()) {
     if (showDialog) {
         Dialog(
             onDismissRequest = { onDismiss() },
@@ -78,13 +98,13 @@ fun ProfileScreenModal(showDialog: Boolean, onDismiss: () -> Unit, user: User) {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(1f) // Ajusta este valor para cambiar la altura
+                    .fillMaxHeight(0.9f)
                     .padding(8.dp),
                 shape = MaterialTheme.shapes.large,
                 color = MaterialTheme.colorScheme.background
             ) {
                 Box{
-                    ProfileScreen(user,{})
+                    Perfil(user,{}, homeViewModel)
                     IconButton(
                         onClick = { onDismiss() },
                         modifier = Modifier
@@ -106,17 +126,25 @@ fun ProfileScreenModal(showDialog: Boolean, onDismiss: () -> Unit, user: User) {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
-fun ProfileScreen(
+fun Perfil(
     userProfile: User,
-    onEditClick: () -> Unit
+    onEditClick: () -> Unit,
+    homeViewModel: HomeViewModel
 ) {
     var nombre by remember { mutableStateOf(userProfile.nombre ?: "") }
     var fecha_nacimiento by remember { mutableStateOf(userProfile.fecha_nac ?: "") }
+    var email by remember { mutableStateOf(userProfile.correo ?: "") }
     var genero by remember { mutableStateOf(userProfile.genero ?: "") }
     var editarPerfil by remember { mutableStateOf(true) }
     var showDatePicker by remember { mutableStateOf(false) }
     val generos = listOf("Masculino", "Femenino")
     var expanded by remember { mutableStateOf(false) }
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    val isLoading by homeViewModel.isLoading.collectAsState()
+    val scrollState = rememberScrollState()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -147,15 +175,15 @@ fun ProfileScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .background(color = White)
+                .verticalScroll(scrollState)
         ) {
-            ProfileImage(imageUrl = userProfile.foto_perfil!!)
+            PerfilImagen(imageUrl = userProfile.foto_perfil!!, selectedImageUri, {value -> selectedImageUri = value})
 
-            Spacer(modifier = Modifier.height(30.dp))
             if(!editarPerfil){
-                ProfileInfo(label = "Nombre completo", value = userProfile.nombre!!)
-                ProfileInfo(label = "Correo electrónico", value = userProfile.correo!!)
-                ProfileInfo(label = "Fecha de nacimiento", value = userProfile.fecha_nac)
-                ProfileInfo(label = "Género", value = userProfile.genero)
+                ProfileInfo(label = "Nombre completo", value = nombre)
+                ProfileInfo(label = "Correo electrónico", value = email)
+                ProfileInfo(label = "Fecha de nacimiento", value = fecha_nacimiento)
+                ProfileInfo(label = "Género", value = genero)
             }else{
                 Text(
                     text = "Editar información",
@@ -249,25 +277,47 @@ fun ProfileScreen(
                         CustomTextFieldDate(fecha_nacimiento)
                     }
                     Spacer(modifier = Modifier.height(32.dp))
-                    Button(
-                        onClick = {},
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                    ) {
-                        Text(text = "Guardar", color = White, fontSize = 18.sp)
+                    if(isLoading){
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.Transparent)
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }else{
+                        Button(
+                            onClick = {
+                                scope.launch {
+                                    val success = homeViewModel.actualizarInformacion(selectedImageUri, User(userProfile.id, nombre, email, "",
+                                        "", fecha_nacimiento, genero))
+                                    if (success) {
+                                        showToast(context, "Información actualizada exitosamente")
+                                    } else {
+                                        showToast(context, "Ocurrió un error al intentar actualizar tus datos")
+                                    }
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                        ) {
+                            Text(text = "Guardar", color = White, fontSize = 18.sp)
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = {editarPerfil = false},
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = SlateGray)
+                        ) {
+                            Text(text = "Cancelar", color = White, fontSize = 18.sp)
+                        }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = {editarPerfil = false},
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = SlateGray)
-                    ) {
-                        Text(text = "Cancelar", color = White, fontSize = 18.sp)
-                    }
+
                 }
             }
         }
@@ -314,25 +364,119 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfileImage(imageUrl: String) {
+fun PerfilImagen(imageUrl: String, selectedImageUri: Uri?, onValueChange:(Uri?)-> Unit) {
+    var showDialogCambiarFotoPerfil by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        //selectedImageUri = uri
+        onValueChange(uri)
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview()
+    ) { bitmap ->
+        bitmap?.let {
+            onValueChange(Uri.parse(
+                MediaStore.Images.Media.insertImage(
+                    context.contentResolver,
+                    bitmap,
+                    "CapturedImage",
+                    null
+                )))
+        }
+    }
     Column(
         modifier = Modifier
             .clip(CircleShape)
-            .padding(16.dp)
+            .padding(top = 16.dp)
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AsyncImage(
-            model = imageUrl,
-            contentDescription = "Foto de perfil",
-            modifier = Modifier
-                .size(200.dp)
-                .clip(CircleShape)
-                .background(Color.Gray),
-            contentScale = ContentScale.Crop
-        )
-        Text(text = "Cambiar foto de perfil", style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.padding(top = 10.dp), color = Black)
+        if(selectedImageUri != null){
+            selectedImageUri?.let { uri ->
+                Image(
+                    painter = rememberImagePainter(data = uri),
+                    contentDescription = null,
+                    modifier = Modifier.size(150.dp)
+                        .size(150.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+            }
+        }else{
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = "Foto de perfil",
+                modifier = Modifier
+                    .size(150.dp)
+                    .clip(CircleShape)
+                    .background(Color.Gray),
+                contentScale = ContentScale.Crop
+            )
+        }
+        TextButton(onClick = { showDialogCambiarFotoPerfil = true }) {
+            Text(
+                text = "Cambiar foto de perfil",
+                color = WineRed,
+                style = MaterialTheme.typography.labelSmall
+            )
+        }
+
+        if (showDialogCambiarFotoPerfil) {
+            AlertDialog(
+                shape = MaterialTheme.shapes.large,
+                onDismissRequest = { showDialogCambiarFotoPerfil = false },
+                buttons = {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(color = Color.Transparent)
+                            .padding(4.dp)
+                    ) {
+                        Button(
+                            onClick = {
+                                showDialogCambiarFotoPerfil = false
+                                galleryLauncher.launch("image/*")
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .padding(2.dp)
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.gallery),
+                                contentDescription = "Gallery",
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Galería", style = MaterialTheme.typography.labelSmall)
+                        }
+
+                        Button(
+                            onClick = {
+                                showDialogCambiarFotoPerfil = false
+                                cameraLauncher.launch(null)
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .padding(2.dp)
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.camera),
+                                contentDescription = "Camera",
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Cámara", style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -388,4 +532,5 @@ fun CustomTextFieldDate(
     )
     Spacer(modifier = Modifier.height(5.dp))
 }
+
 
