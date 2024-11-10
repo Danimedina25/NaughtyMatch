@@ -51,6 +51,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.danifitdev.naughtymatch.R
 import com.danifitdev.naughtymatch.ui.viewmodel.LoginViewModel
 import com.danifitdev.naughtymatch.showToast
+import com.danifitdev.naughtymatch.ui.theme.Poppins
 import com.danifitdev.naughtymatch.ui.theme.White
 import com.facebook.login.LoginManager
 
@@ -116,7 +117,8 @@ fun LoginScreen(
                  keyboardOptions = KeyboardOptions.Default.copy(
                      imeAction = ImeAction.Next // Acción de siguiente en el teclado
                  ),
-                 textStyle = TextStyle(color = MaterialTheme.colorScheme.onSecondary, fontSize = 16.sp),
+                 textStyle = TextStyle(color = MaterialTheme.colorScheme.onSecondary,
+                     fontSize = 16.sp, fontFamily = Poppins),
                  colors = TextFieldDefaults.textFieldColors(
                      containerColor = MaterialTheme.colorScheme.surface,
                      focusedIndicatorColor = Color.Transparent,
@@ -134,7 +136,8 @@ fun LoginScreen(
                  modifier = Modifier.fillMaxWidth(),
                  shape = RoundedCornerShape(16.dp),
                  singleLine = true,
-                 textStyle = TextStyle(color = MaterialTheme.colorScheme.onSecondary, fontSize = 16.sp),
+                 textStyle = TextStyle(color = MaterialTheme.colorScheme.onSecondary, fontSize = 16.sp,
+                     fontFamily = Poppins),
                  colors = TextFieldDefaults.textFieldColors(
                      containerColor = MaterialTheme.colorScheme.surface,
                      focusedIndicatorColor = Color.Transparent,
@@ -174,7 +177,7 @@ fun LoginScreen(
                          .height(50.dp),
                      colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                  ) {
-                     Text(text = "Iniciar sesión", color = White, fontSize = 18.sp)
+                     Text(text = "Iniciar sesión", color = White, fontSize = 18.sp, fontFamily = Poppins)
                  }
 
                  Spacer(modifier = Modifier.height(8.dp))
@@ -188,7 +191,7 @@ fun LoginScreen(
                          .height(50.dp),
                      colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1877F2)) // Color oficial de Facebook
                  ) {
-                     Text(text = "Iniciar sesión con Facebook", color = White, fontSize = 18.sp)
+                     Text(text = "Iniciar sesión con Facebook", color = White, fontSize = 18.sp, fontFamily = Poppins)
                  }
                  Spacer(modifier = Modifier.height(16.dp))
 
@@ -196,7 +199,8 @@ fun LoginScreen(
                      Text(
                          text = "¿No tienes una cuenta? Regístrate",
                          color = MaterialTheme.colorScheme.onPrimary,
-                         fontSize = 15.sp
+                         fontSize = 15.sp,
+                         fontFamily = Poppins
                      )
                  }
              }

@@ -45,6 +45,9 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private val _emparejado = MutableStateFlow(false)
+    val emparejado: StateFlow<Boolean> = _emparejado
+
     fun logout() {
         viewModelScope.launch {
             // Cierra sesión en Firebase
@@ -55,6 +58,7 @@ class HomeViewModel @Inject constructor(
             userPreferencesRepository.setLoggedIn(false)
         }
     }
+
     suspend fun actualizarInformacion(imageUri: Uri?, user: User): Boolean {
         _isLoading.value = true
         val firebaseUser = FirebaseAuth.getInstance().currentUser

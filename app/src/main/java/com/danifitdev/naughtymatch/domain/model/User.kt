@@ -7,5 +7,6 @@ data class User(
     var telefono: String = "",
     var foto_perfil: String? = "",
     var fecha_nac: String = "",
-    var genero: String = ""
+    var genero: String = "",
+    var emparejado: Boolean = false
 )

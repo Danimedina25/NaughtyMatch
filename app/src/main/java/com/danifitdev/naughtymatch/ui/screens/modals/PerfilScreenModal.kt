@@ -80,6 +80,7 @@ import com.danifitdev.naughtymatch.ui.theme.Black
 import com.danifitdev.naughtymatch.ui.theme.DeepRed
 import com.danifitdev.naughtymatch.ui.theme.SlateGray
 import com.danifitdev.naughtymatch.ui.theme.GhostWhite
+import com.danifitdev.naughtymatch.ui.theme.Poppins
 import com.danifitdev.naughtymatch.ui.theme.White
 import com.danifitdev.naughtymatch.ui.theme.WineRed
 import com.danifitdev.naughtymatch.ui.viewmodel.HomeViewModel
@@ -157,7 +158,7 @@ fun Perfil(
                 ),
                 title = { Text("Perfil",
                     style = MaterialTheme.typography.bodyLarge,
-                   color = MaterialTheme.colorScheme.onPrimary, ) },
+                   color = MaterialTheme.colorScheme.onPrimary) },
                 navigationIcon = {
                     IconButton(onClick = { editarPerfil = true }) {
                         Icon(
@@ -192,7 +193,7 @@ fun Perfil(
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 10.dp)
+                        .padding(bottom = 10.dp),
                 )
                 Column(
                     modifier = Modifier
@@ -205,7 +206,8 @@ fun Perfil(
                         label = {
                             Text(
                                 "Nombre completo",
-                                color = SlateGray
+                                color = SlateGray,
+                                fontFamily = Poppins
                             )
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -230,7 +232,8 @@ fun Perfil(
                             label = {
                                 Text(
                                     "Género",
-                                    color = SlateGray
+                                    color = SlateGray,
+                                    fontFamily = Poppins
                                 )
                             },
                             modifier = Modifier.fillMaxWidth(),
@@ -263,7 +266,7 @@ fun Perfil(
                                     expanded = false
                                 }) {
                                     Text(text = gender,  color = Black,
-                                        fontSize = 16.sp)
+                                        fontSize = 16.sp, fontFamily = Poppins)
                                 }
                             }
                         }
@@ -304,7 +307,7 @@ fun Perfil(
                                 .height(50.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                         ) {
-                            Text(text = "Guardar", color = White, fontSize = 18.sp)
+                            Text(text = "Guardar", color = White, fontSize = 18.sp, fontFamily = Poppins)
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(
@@ -314,7 +317,7 @@ fun Perfil(
                                 .height(50.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = SlateGray)
                         ) {
-                            Text(text = "Cancelar", color = White, fontSize = 18.sp)
+                            Text(text = "Cancelar", color = White, fontSize = 18.sp, fontFamily = Poppins)
                         }
                     }
 
@@ -344,11 +347,11 @@ fun Perfil(
                     },
                     enabled = confirmEnabled.value
                 ) {
-                    Text("OK")
+                    Text("OK", fontFamily = Poppins)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                TextButton(onClick = { showDatePicker = false }) { Text("Cancelar", fontFamily = Poppins) }
             }
         ) {
             // The verticalScroll will allow scrolling to show the entire month in case there is not
@@ -513,7 +516,8 @@ fun CustomTextFieldDate(
         label = {
             Text(
                 "Fecha de nacimiento",
-                color = SlateGray
+                color = SlateGray,
+                fontFamily = Poppins
             )
         },
         modifier = Modifier.fillMaxWidth(),

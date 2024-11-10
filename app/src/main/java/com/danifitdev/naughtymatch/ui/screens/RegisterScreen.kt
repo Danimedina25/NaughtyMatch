@@ -50,6 +50,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.danifitdev.naughtymatch.R
 import com.danifitdev.naughtymatch.ui.viewmodel.LoginViewModel
 import com.danifitdev.naughtymatch.showToast
+import com.danifitdev.naughtymatch.ui.theme.Poppins
 import com.danifitdev.naughtymatch.ui.theme.White
 import com.google.firebase.auth.FirebaseAuth
 
@@ -96,26 +97,28 @@ fun RegisterScreen(
                 text = "Naughty Match",
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(top = 25.dp)
+                modifier = Modifier.padding(top = 25.dp),
+                fontFamily = Poppins
             )
             Text(
                 text = "Regístrate",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(bottom = 15.dp, top = 15.dp)
+                modifier = Modifier.padding(bottom = 15.dp, top = 15.dp),
+                fontFamily = Poppins
             )
 
             TextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Correo electrónico", color = MaterialTheme.colorScheme.onSecondary) },
+                label = { Text("Correo electrónico", color = MaterialTheme.colorScheme.onSecondary,) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Next // Acción de siguiente en el teclado
                 ),
-                textStyle = TextStyle(color= MaterialTheme.colorScheme.onSecondary),
+                textStyle = TextStyle(color= MaterialTheme.colorScheme.onSecondary, fontFamily = Poppins),
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     focusedIndicatorColor = Color.Transparent,
@@ -136,7 +139,7 @@ fun RegisterScreen(
                 keyboardOptions = KeyboardOptions.Default.copy(
                     imeAction = ImeAction.Next // Acción de siguiente en el teclado
                 ),
-                textStyle = TextStyle(color = MaterialTheme.colorScheme.onSecondary),
+                textStyle = TextStyle(color = MaterialTheme.colorScheme.onSecondary, fontFamily = Poppins),
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     focusedIndicatorColor = Color.Transparent,
@@ -164,7 +167,7 @@ fun RegisterScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 singleLine = true,
-                textStyle = TextStyle(color = MaterialTheme.colorScheme.onSecondary),
+                textStyle = TextStyle(color = MaterialTheme.colorScheme.onSecondary, fontFamily = Poppins),
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     focusedIndicatorColor = Color.Transparent,
@@ -205,7 +208,7 @@ fun RegisterScreen(
                         .height(50.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Text(text = "Registrarse", color = White, fontSize = 18.sp)
+                    Text(text = "Registrarse", color = White, fontSize = 18.sp, fontFamily = Poppins)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -214,7 +217,8 @@ fun RegisterScreen(
                     Text(
                         text = "¿Ya tienes una cuenta? Inicia sesión",
                         color = MaterialTheme.colorScheme.onPrimary,
-                        fontSize = 15.sp
+                        fontSize = 15.sp,
+                        fontFamily = Poppins
                     )
                 }
             }
