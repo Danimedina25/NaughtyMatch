@@ -117,6 +117,7 @@ class LoginViewModel @Inject constructor(
         }
         loginWithEmail(email, password)
     }
+
     fun limpiarMensajeError(){
         _errorMessage.value = ""
     }

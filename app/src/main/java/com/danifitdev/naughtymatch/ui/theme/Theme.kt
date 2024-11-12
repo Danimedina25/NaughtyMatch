@@ -13,20 +13,20 @@ import androidx.compose.ui.platform.LocalContext
 private val DarkColorScheme = darkColorScheme(
     primary = DeepRed,            // Usando Rojo oscuro
     secondary = Gold,             // Usando Dorado
-    tertiary = DarkGray,          // Usando Gris oscuro
+    tertiary = White,          // Usando Gris oscuro
     background = SoftBlack,       // Fondo en Negro suave
     surface = IntenseBlack,       // Superficie en Negro intenso
     onPrimary = White,        // Texto en Blanco cálido sobre el primario
     onSecondary = White,      // Texto en Blanco cálido sobre el secundario
     onTertiary = WarmWhite,       // Texto en Blanco cálido sobre el terciario
     onBackground = WarmWhite,     // Texto en Blanco cálido sobre el fondo
-    onSurface = PlatinumGold         // Texto en Blanco cálido sobre la superficie
+    onSurface = PlatinumGold,         // Texto en Blanco cálido sobre la superficie
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = Coral,              // Usando Coral
     secondary = GoldenYellow,     // Usando Amarillo dorado
-    tertiary = SoftPink,          // Usando Rosa suave
+    tertiary = IntenseBlack,          // Usando Rosa suave
     background = WarmWhite,       // Fondo en Blanco cálido
     surface = White,           // Superficie en Gris cálido
     onPrimary = IntenseBlack,     // Texto en Negro intenso sobre el primario
