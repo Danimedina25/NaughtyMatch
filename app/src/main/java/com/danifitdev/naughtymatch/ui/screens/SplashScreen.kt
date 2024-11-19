@@ -27,19 +27,16 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(onNavigateToLogin: () -> Unit, onNavigateToMain: () -> Unit, loginViewModel: LoginViewModel = hiltViewModel()) {
-
-    val context = LocalContext.current
-    val isLogged by loginViewModel.isLoggedIn.collectAsState(false)
-    LaunchedEffect(isLogged) {
-        delay(100)
-        if (isLogged) {
+    val isLogged by loginViewModel.isLoggedIn.collectAsState()
+    LaunchedEffect(Unit) {
+        if(!isLogged){
+            loginViewModel.getAndroidId()
+            loginViewModel.validarSiEstaRegistrado(onNavigateToLogin, onNavigateToMain)
+        }else{
             onNavigateToMain()
-        } else {
-            onNavigateToLogin()
         }
     }
 
-    // Box para centrar el contenido
     Box(modifier = Modifier.fillMaxSize()
         .background(
            color = MaterialTheme.colorScheme.background

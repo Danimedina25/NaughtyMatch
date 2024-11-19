@@ -6,7 +6,7 @@ import com.google.firebase.auth.FirebaseUser
 import javax.inject.Inject
 
 class LoginWithEmailUseCase @Inject constructor(private val repository: LoginRepository) {
-    suspend operator fun invoke(email: String, password: String): Result<User?> {
-        return repository.loginWithEmail(email, password)
+    suspend operator fun invoke(email: String, password: String, androidId: String): Result<User?> {
+        return repository.loginWithEmail(email, password, androidId)
     }
 }

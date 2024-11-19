@@ -45,19 +45,14 @@ fun AppNavGraph(navController: NavHostController,  activity: ComponentActivity, 
         }
         composable(Screen.LoginScreen.route) {
             LoginScreen(
-                onNavigateToHome = {
+                onNavigateToMain = {
                     navController.navigate(Screen.HomeScreen.route){
                         popUpTo(Screen.LoginScreen.route) { inclusive = true }
                     }
                 },
                 onFacebookLogin = {
                     performFacebookLogin(activity)
-                },
-                onNavigateToRegister = {
-                    navController.navigate(Screen.RegisterScreen.route){
-                        popUpTo(Screen.LoginScreen.route) { inclusive = true }
-                    }
-                },
+                }
             )
         }
         composable(route = Screen.RegisterScreen.route){ backStackEntry ->

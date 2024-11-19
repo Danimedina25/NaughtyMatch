@@ -1,32 +1,28 @@
 package com.danifitdev.naughtymatch.data.repository
 
+import android.util.Log
 import com.danifitdev.naughtymatch.domain.model.User
 import com.danifitdev.naughtymatch.domain.repository.LoginRepository
 import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.FirebaseDatabase
+import com.google.gson.Gson
 import kotlinx.coroutines.tasks.await
+import okhttp3.internal.userAgent
 import javax.inject.Inject
 
 
 class LoginRepositoryImpl  @Inject constructor(
     private val firebaseAuth: FirebaseAuth
 ) : LoginRepository {
-    override suspend fun loginWithEmail(email: String, password: String): Result<User?> {
+    override suspend fun loginWithEmail(email: String, password: String, androidId: String): Result<User?> {
         return try {
             val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
             val firebaseUser = authResult.user
             firebaseUser.let {
-                val userMapper = mapFirebaseUserToUser(it!!)
-                val userDataInDb = getUserData(userMapper.id)
-                if(userDataInDb != null){
-                    userMapper.nombre = userDataInDb.nombre
-                    userMapper.genero = userDataInDb.genero
-                    userMapper.fecha_nac = userDataInDb.fecha_nac
-                    userMapper.telefono = userDataInDb.telefono
-                }
-                Result.success(userMapper)
+                val userDataInFirebase = getUserDataInFirebase(firebaseUser!!.uid)
+                Result.success(userDataInFirebase)
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -47,11 +43,11 @@ class LoginRepositoryImpl  @Inject constructor(
         return try {
             val authResult = firebaseAuth.signInWithCredential(credential).await()
             val userMapper = mapFirebaseUserToUser(authResult.user!!)
-            val userDataInDb = getUserData(userMapper.id)
+            val userDataInDb = getUserDataInFirebase(userMapper.androidId)
             if(userDataInDb != null){
                 userMapper.nombre = userDataInDb.nombre
                 userMapper.genero = userDataInDb.genero
-                userMapper.fecha_nac = userDataInDb.fecha_nac
+                userMapper.fechaNac = userDataInDb.fechaNac
                 userMapper.telefono = userDataInDb.telefono
             }
             Result.success(userMapper)
@@ -60,10 +56,9 @@ class LoginRepositoryImpl  @Inject constructor(
         }
     }
 
-
-    suspend fun getUserData(uid: String): User? {
+    suspend fun getUserDataInFirebase(authId: String): User? {
         val database = FirebaseDatabase.getInstance()
-        val userRef = database.getReference("usuarios").child(uid)
+        val userRef = database.getReference("usuarios").child(authId)
 
         return try {
             val snapshot = userRef.get().await()
@@ -73,5 +68,4 @@ class LoginRepositoryImpl  @Inject constructor(
             null
         }
     }
-
 }

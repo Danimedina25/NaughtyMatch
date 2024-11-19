@@ -33,7 +33,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import com.danifitdev.naughtymatch.domain.model.User
 import com.danifitdev.naughtymatch.showToast
 import com.danifitdev.naughtymatch.ui.screens.modals.PerfilScreenModal
 import com.danifitdev.naughtymatch.ui.theme.White
@@ -57,23 +56,18 @@ import com.danifitdev.naughtymatch.ui.theme.SlateGray
 fun HomeScreen(navController: NavController,
                onNavigateToLogin:()->Unit, homeViewModel: HomeViewModel = hiltViewModel()) {
     val isLogged by homeViewModel.isLoggedIn.collectAsState(initial = true)
-    val user by homeViewModel.currentUser.collectAsState()
     val emparejado by homeViewModel.emparejado.collectAsState()
     val isLoading by homeViewModel.isLoading.collectAsState(initial = false)
     val mensajeLoader by homeViewModel.messageLoader.collectAsState("")
+    val context = LocalContext.current
 
-    LaunchedEffect(emparejado) {
-        homeViewModel.verificarSiYaEstaEmparejado()
+    LaunchedEffect(Unit) {
+       homeViewModel.verificarSiYaEstaEmparejado()
     }
 
-    LaunchedEffect(isLogged) {
-        if(!isLogged){
-            onNavigateToLogin()
-        }
-    }
     Scaffold(
         topBar = {
-            TopBar(homeViewModel, user!!)
+            TopBar(homeViewModel, onNavigateToLogin, isLogged)
         }
     ) { innerPadding ->
         if(isLoading){
@@ -83,7 +77,6 @@ fun HomeScreen(navController: NavController,
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(WindowInsets.statusBars.asPaddingValues()), homeViewModel,
-             user!!,
              emparejado
         )
     }
@@ -91,8 +84,7 @@ fun HomeScreen(navController: NavController,
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileBody(modifier: Modifier, homeViewModel: HomeViewModel, user: User, emparejado :Boolean) {
-    val mostrarOpcionGenerarCodigo by homeViewModel.opcionGenerarCodigo.collectAsState(false)
+fun ProfileBody(modifier: Modifier, homeViewModel: HomeViewModel, emparejado :Boolean) {
     val mostrarOpcionIngresarCodigo by homeViewModel.opcionIngresarCodigo.collectAsState(false)
     val codigoGenerado by homeViewModel.codigoGenerado.collectAsState("")
     val mensajeError by homeViewModel.errorMessage.collectAsState(null)
@@ -114,7 +106,7 @@ fun ProfileBody(modifier: Modifier, homeViewModel: HomeViewModel, user: User, em
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(80.dp))
-        Text("Bienvenido ${user.nombre}", fontSize = 18.sp, style = MaterialTheme.typography.bodyLarge,
+        Text("Bienvenido", fontSize = 18.sp, style = MaterialTheme.typography.bodyLarge,
             fontFamily = Poppins, fontWeight = FontWeight.W700)
         Spacer(modifier = Modifier.height(10.dp))
         Row(modifier = Modifier
@@ -132,7 +124,7 @@ fun ProfileBody(modifier: Modifier, homeViewModel: HomeViewModel, user: User, em
                         contentScale = ContentScale.Fit
                     )
                     Text(
-                        "Emparejado con: ${pareja.nombre}", fontSize = 14.sp, style = MaterialTheme.typography.titleLarge,
+                        "Emparejado", fontSize = 14.sp, style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.padding(start = 8.dp), fontWeight = FontWeight.Normal,
                         fontFamily = Poppins
                     )
@@ -157,59 +149,22 @@ fun ProfileBody(modifier: Modifier, homeViewModel: HomeViewModel, user: User, em
         }
         if(!emparejado){
             Spacer(modifier = Modifier.height(40.dp))
-            Card(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .clickable {
-                       homeViewModel.mostrarOpcionGenerarCodigo()
-                    },
-                shape = RoundedCornerShape(25.dp),
-                elevation = 4.dp,
-                backgroundColor = if(!mostrarOpcionGenerarCodigo) LightGray else MaterialTheme.colorScheme.background
-            ) {
+            Text(codigoGenerado, fontSize = 20.sp,
+                style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(horizontal = 50.dp),
+                textAlign = TextAlign.Center, fontFamily = Poppins )
+
+            if(codigoGenerado.isNotEmpty()){
                 Text(
-                    "Quiero generar un código para compartir con mi pareja",
-                    fontSize = 16.sp,
+                    "Comparte este código con tu pareja para iniciar el juego",
+                    fontSize = 13.sp,
                     style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(horizontal = 50.dp, vertical = 20.dp),
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
                     textAlign = TextAlign.Center,
                     fontFamily = Poppins,
-                    color = if(!mostrarOpcionGenerarCodigo) Black else MaterialTheme.colorScheme.tertiary
+                    color = Black
                 )
             }
-            if(mostrarOpcionGenerarCodigo){
-                Spacer(modifier = Modifier.height(10.dp))
-                Button(
-                    onClick = {
-                        homeViewModel.setMessageLoader("Generando código...")
-                        homeViewModel.generateUniqueCode(6)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .padding(horizontal = 20.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = DarkGold)
-                ) {
-                    androidx.compose.material3.Text(text = "Obtener código", color = White, fontSize = 18.sp, fontFamily = Poppins)
-                }
 
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(codigoGenerado, fontSize = 20.sp,
-                    style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(horizontal = 50.dp),
-                    textAlign = TextAlign.Center, fontFamily = Poppins )
-
-                if(codigoGenerado.isNotEmpty()){
-                    Text(
-                        "Comparte este código con tu pareja para iniciar el juego",
-                        fontSize = 13.sp,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
-                        textAlign = TextAlign.Center,
-                        fontFamily = Poppins,
-                        color = Black
-                    )
-                }
-            }
             Card(
                 modifier = Modifier
                     .padding(16.dp)
@@ -263,7 +218,7 @@ fun ProfileBody(modifier: Modifier, homeViewModel: HomeViewModel, user: User, em
                 Button(
                     onClick = {
                         homeViewModel.setMessageLoader("Haciendo match...")
-                        homeViewModel.aceptarMatch(codigoIngresado)
+                        homeViewModel.hacerMatch(codigoIngresado)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -283,12 +238,13 @@ fun ProfileBody(modifier: Modifier, homeViewModel: HomeViewModel, user: User, em
                     }
                 }
             }
+
         }
     }
 }
 
 @Composable
-fun TopBar(homeViewmodel: HomeViewModel, user: User) {
+fun TopBar(homeViewmodel: HomeViewModel, onNavigateToLogin: () -> Unit, isLogged: Boolean) {
     var expanded by remember { mutableStateOf(false) }
     var showDialogPerfil by remember { mutableStateOf(false) }
     Box(
@@ -325,11 +281,13 @@ fun TopBar(homeViewmodel: HomeViewModel, user: User) {
                     expanded = expanded,
                     onDismissRequest = { expanded = false }
                 ) {
-                    DropdownMenuItem(onClick = {
-                        expanded = false
-                        homeViewmodel.logout()
-                    }) {
-                        Text("Cerrar sesión", fontFamily = Poppins)
+                    if(isLogged){
+                        DropdownMenuItem(onClick = {
+                            expanded = false
+                            homeViewmodel.logout(onNavigateToLogin)
+                        }) {
+                            Text("Cerrar sesión", fontFamily = Poppins)
+                        }
                     }
                     DropdownMenuItem(onClick = {
                         expanded = false
@@ -342,7 +300,7 @@ fun TopBar(homeViewmodel: HomeViewModel, user: User) {
             backgroundColor = Color.Transparent,
             elevation = 0.dp
         )
-        PerfilScreenModal(showDialog = showDialogPerfil, onDismiss = { showDialogPerfil = false }, user)
+        PerfilScreenModal(showDialog = showDialogPerfil, onDismiss = { showDialogPerfil = false }, onNavigateToLogin)
     }
 }
 

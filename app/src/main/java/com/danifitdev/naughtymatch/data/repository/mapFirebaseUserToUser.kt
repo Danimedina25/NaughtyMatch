@@ -6,9 +6,9 @@ import com.google.firebase.auth.FirebaseUser
 
 fun mapFirebaseUserToUser(firebaseUser: FirebaseUser): User {
     return User(
-        id = firebaseUser.uid,
+        authId = firebaseUser.uid,
         nombre = firebaseUser.displayName,
         correo = firebaseUser.email,
-        foto_perfil = firebaseUser.photoUrl.toString()
+        fotoPerfil = firebaseUser.photoUrl.toString()
     )
 }

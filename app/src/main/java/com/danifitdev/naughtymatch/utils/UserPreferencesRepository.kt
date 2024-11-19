@@ -26,7 +26,7 @@ class UserPreferencesRepository @Inject constructor(
         .map { preferences ->
             preferences[IS_LOGGED_IN_KEY] ?: false
         }
-    // Obtiene el usuario almacenado
+
     val user: Flow<User?> = context.dataStore.data
         .map { preferences ->
             preferences[USER_KEY]?.let { userJson ->
@@ -34,7 +34,6 @@ class UserPreferencesRepository @Inject constructor(
             }
         }
 
-    // Guarda el usuario en DataStore
     suspend fun saveUser(user: User) {
         context.dataStore.edit { preferences ->
             preferences[USER_KEY] = Gson().toJson(user)

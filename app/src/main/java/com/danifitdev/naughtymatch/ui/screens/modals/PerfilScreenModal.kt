@@ -27,6 +27,7 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuBox
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
@@ -65,6 +66,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -90,7 +93,9 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun PerfilScreenModal(showDialog: Boolean, onDismiss: () -> Unit, user: User, homeViewModel: HomeViewModel = hiltViewModel()) {
+fun PerfilScreenModal(showDialog: Boolean, onDismiss: () -> Unit, onNavigateToLogin:()->Unit, homeViewModel: HomeViewModel = hiltViewModel()) {
+    val user by homeViewModel.currentUser.collectAsState()
+
     if (showDialog) {
         Dialog(
             onDismissRequest = { onDismiss() },
@@ -105,7 +110,7 @@ fun PerfilScreenModal(showDialog: Boolean, onDismiss: () -> Unit, user: User, ho
                 color = MaterialTheme.colorScheme.background
             ) {
                 Box{
-                    Perfil(user,{}, homeViewModel)
+                    Perfil(user!!,{}, onNavigateToLogin, homeViewModel )
                     IconButton(
                         onClick = { onDismiss() },
                         modifier = Modifier
@@ -130,13 +135,18 @@ fun PerfilScreenModal(showDialog: Boolean, onDismiss: () -> Unit, user: User, ho
 fun Perfil(
     userProfile: User,
     onEditClick: () -> Unit,
+    onNavigateToLogin:()->Unit,
     homeViewModel: HomeViewModel
 ) {
     var nombre by remember { mutableStateOf(userProfile.nombre ?: "") }
-    var fecha_nacimiento by remember { mutableStateOf(userProfile.fecha_nac ?: "") }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var fechaNacimiento by remember { mutableStateOf(userProfile.fechaNac ?: "") }
     var email by remember { mutableStateOf(userProfile.correo ?: "") }
     var genero by remember { mutableStateOf(userProfile.genero ?: "") }
-    var editarPerfil by remember { mutableStateOf(true) }
+    val editarPerfil by homeViewModel.editarPerfil.collectAsState()
+    val isLogged by homeViewModel.isLoggedIn.collectAsState()
     var showDatePicker by remember { mutableStateOf(false) }
     val generos = listOf("Masculino", "Femenino")
     var expanded by remember { mutableStateOf(false) }
@@ -145,6 +155,14 @@ fun Perfil(
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val registroExitoso by homeViewModel.registroExitoso.collectAsState()
+
+    LaunchedEffect(registroExitoso){
+        if(registroExitoso){
+            showToast(context, "Te has registrado correctamente en Naughty Match :)")
+            onNavigateToLogin()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -156,16 +174,26 @@ fun Perfil(
                     scrolledContainerColor = Color.Transparent,
                     titleContentColor = Color.Transparent
                 ),
-                title = { Text("Perfil",
+                title = { Text(text = if(isLogged && editarPerfil) "Editar perfil" else if(isLogged && !editarPerfil) "Perfil" else "Registrar perfil",
                     style = MaterialTheme.typography.bodyLarge,
                    color = MaterialTheme.colorScheme.onPrimary) },
                 navigationIcon = {
-                    IconButton(onClick = { editarPerfil = true }) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Editar perfil",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
+                    if(isLogged && editarPerfil){
+                        IconButton(onClick = { homeViewModel.setEditarPerfil(true) }) {
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = "Editar perfil",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }else if(isLogged && !editarPerfil){
+                        IconButton(onClick = { homeViewModel.setEditarPerfil(true) }) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Editar perfil",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
                     }
                 }
             )
@@ -178,23 +206,26 @@ fun Perfil(
                 .background(color = White)
                 .verticalScroll(scrollState)
         ) {
-            PerfilImagen(imageUrl = userProfile.foto_perfil!!, selectedImageUri, {value -> selectedImageUri = value})
 
-            if(!editarPerfil){
+            PerfilImagen(imageUrl = userProfile.fotoPerfil!!, selectedImageUri, {value -> selectedImageUri = value},
+                if(!isLogged) "Cargar foto de perfil" else "Cambiar foto de perfil")
+            if(!editarPerfil && isLogged){
                 ProfileInfo(label = "Nombre completo", value = nombre)
                 ProfileInfo(label = "Correo electrónico", value = email)
-                ProfileInfo(label = "Fecha de nacimiento", value = fecha_nacimiento)
+                ProfileInfo(label = "Fecha de nacimiento", value = fechaNacimiento)
                 ProfileInfo(label = "Género", value = genero)
             }else{
                 Text(
-                    text = "Editar información",
+                    text = if(editarPerfil && isLogged) "Editar información"
+                    else "Regístrate para guardar tus datos de juego y obtener una mejor experiencia",
                     style = MaterialTheme.typography.bodyLarge,
                     color = Black,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 10.dp),
+                        .padding(bottom = 10.dp, end = 16.dp, start = 16.dp),
                 )
+
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -224,7 +255,32 @@ fun Perfil(
                             disabledIndicatorColor = Color.Transparent,
                         ),
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
+                    TextField(
+                        value = email,
+                        onValueChange = { email = it },
+                        label = {
+                            Text(
+                                "Correo electrónico",
+                                color = SlateGray,
+                                fontFamily = Poppins
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        singleLine = true,
+                        textStyle = TextStyle(
+                            color = Black,
+                            fontSize = 16.sp
+                        ),
+                        colors = TextFieldDefaults.textFieldColors(
+                            containerColor = GhostWhite,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                        ),
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
                     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
                         TextField(
                             value = genero,
@@ -271,15 +327,88 @@ fun Perfil(
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { showDatePicker = true } // Abre el DatePicker
                     ) {
-                        CustomTextFieldDate(fecha_nacimiento)
+                        CustomTextFieldDate(fechaNacimiento)
                     }
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
+                    if(!isLogged){
+                        TextField(
+                            value = password,
+                            onValueChange = { password = it },
+                            label = {
+                                Text(
+                                    "Contraseña",
+                                    color = SlateGray,
+                                    fontFamily = Poppins
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            singleLine = true,
+                            textStyle = TextStyle(
+                                color = Black,
+                                fontSize = 16.sp
+                            ),
+                            colors = TextFieldDefaults.textFieldColors(
+                                containerColor = GhostWhite,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent,
+                            ),
+                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            trailingIcon = {
+                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                    Icon(
+                                        painter = painterResource(id = if (passwordVisible) R.drawable.icon_eye else R.drawable.icon_eye_off),
+                                        contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña",
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                }
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        TextField(
+                            value = confirmPassword,
+                            onValueChange = { confirmPassword = it },
+                            label = {
+                                Text(
+                                    "Confirmar contraseña",
+                                    color = SlateGray,
+                                    fontFamily = Poppins
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            singleLine = true,
+                            textStyle = TextStyle(
+                                color = Black,
+                                fontSize = 16.sp
+                            ),
+                            colors = TextFieldDefaults.textFieldColors(
+                                containerColor = GhostWhite,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent,
+                            ),
+                            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                            trailingIcon = {
+                                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                    Icon(
+                                        painter = painterResource(id = if (passwordVisible) R.drawable.icon_eye else R.drawable.icon_eye_off),
+                                        contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña",
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                }
+                            }
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
                     if(isLoading){
                         Box(
                             contentAlignment = Alignment.Center,
@@ -290,34 +419,82 @@ fun Perfil(
                             CircularProgressIndicator()
                         }
                     }else{
-                        Button(
-                            onClick = {
-                                scope.launch {
-                                    val success = homeViewModel.actualizarInformacion(selectedImageUri, User(userProfile.id, nombre, email, "",
-                                        "", fecha_nacimiento, genero))
-                                    if (success) {
-                                        showToast(context, "Información actualizada exitosamente")
-                                    } else {
-                                        showToast(context, "Ocurrió un error al intentar actualizar tus datos")
+                        if(editarPerfil) {
+                            Button(
+                                onClick = {
+                                    scope.launch {
+                                        val success = homeViewModel.actualizarInformacion(
+                                            selectedImageUri, User(
+                                                userProfile.androidId, nombre, email, "",
+                                                "", fechaNacimiento, genero
+                                            )
+                                        )
+                                        if (success) {
+                                            showToast(
+                                                context,
+                                                "Información actualizada exitosamente"
+                                            )
+                                        } else {
+                                            showToast(
+                                                context,
+                                                "Ocurrió un error al intentar actualizar tus datos"
+                                            )
+                                        }
                                     }
-                                }
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(50.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                        ) {
-                            Text(text = "Guardar", color = White, fontSize = 18.sp, fontFamily = Poppins)
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Button(
-                            onClick = {editarPerfil = false},
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(50.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = SlateGray)
-                        ) {
-                            Text(text = "Cancelar", color = White, fontSize = 18.sp, fontFamily = Poppins)
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(50.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                            ) {
+                                Text(
+                                    text = "Guardar",
+                                    color = White,
+                                    fontSize = 18.sp,
+                                    fontFamily = Poppins
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(
+                                onClick = { homeViewModel.setEditarPerfil(false) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(50.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = SlateGray)
+                            ) {
+                                Text(
+                                    text = "Cancelar",
+                                    color = White,
+                                    fontSize = 18.sp,
+                                    fontFamily = Poppins
+                                )
+                            }
+                        }else if(!isLogged){
+                            Button(
+                                onClick = {
+                                    homeViewModel.validarDatosRegistro(selectedImageUri, nombre, email, genero, fechaNacimiento,
+                                        password, confirmPassword)
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(50.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                            ) {
+                                Text(
+                                    text = "Registrar",
+                                    color = White,
+                                    fontSize = 18.sp,
+                                    fontFamily = Poppins
+                                )
+                            }
+                            TextButton(modifier = Modifier.fillMaxWidth(), onClick = onNavigateToLogin) {
+                                Text(
+                                    text = "¿Ya tienes una cuenta? Inicia sesión",
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    fontSize = 15.sp,
+                                    fontFamily = Poppins
+                                )
+                            }
                         }
                     }
 
@@ -343,7 +520,7 @@ fun Perfil(
                         val localDate = instant.atZone(ZoneId.of("UTC")).toLocalDate()
                         val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
                         val formattedDate = localDate.format(formatter)
-                        fecha_nacimiento = formattedDate
+                        fechaNacimiento = formattedDate
                     },
                     enabled = confirmEnabled.value
                 ) {
@@ -367,7 +544,7 @@ fun Perfil(
 }
 
 @Composable
-fun PerfilImagen(imageUrl: String, selectedImageUri: Uri?, onValueChange:(Uri?)-> Unit) {
+fun PerfilImagen(imageUrl: String, selectedImageUri: Uri?, onValueChange:(Uri?)-> Unit, textButton: String) {
     var showDialogCambiarFotoPerfil by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
@@ -422,7 +599,7 @@ fun PerfilImagen(imageUrl: String, selectedImageUri: Uri?, onValueChange:(Uri?)-
         }
         TextButton(onClick = { showDialogCambiarFotoPerfil = true }) {
             Text(
-                text = "Cambiar foto de perfil",
+                text = textButton,
                 color = WineRed,
                 style = MaterialTheme.typography.labelSmall
             )

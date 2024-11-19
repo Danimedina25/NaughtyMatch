@@ -58,9 +58,8 @@ import com.facebook.login.LoginManager
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    onNavigateToHome:()->Unit,
+    onNavigateToMain:()->Unit,
     onFacebookLogin: () -> Unit,
-    onNavigateToRegister: () -> Unit,
     loginViewModel: LoginViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -72,8 +71,9 @@ fun LoginScreen(
     val errorMessage by loginViewModel.errorMessage.collectAsState()
 
     LaunchedEffect(isLogged) {
-        if (isLogged)
-            onNavigateToHome()
+        if (isLogged){
+            onNavigateToMain()
+        }
     }
 
     LaunchedEffect(errorMessage) {
@@ -171,7 +171,10 @@ fun LoginScreen(
 
                  Button(
                      onClick = {
-                         loginViewModel.validarDatos(email.trim(), password.trim())},
+                         if(loginViewModel.validarDatos(email.trim(), password.trim())){
+                             loginViewModel.getAndroidId()
+                             loginViewModel.loginWithEmail(email.trim(), password.trim())
+                         }},
                      modifier = Modifier
                          .fillMaxWidth()
                          .height(50.dp),
@@ -192,16 +195,6 @@ fun LoginScreen(
                      colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1877F2)) // Color oficial de Facebook
                  ) {
                      Text(text = "Iniciar sesión con Facebook", color = White, fontSize = 18.sp, fontFamily = Poppins)
-                 }
-                 Spacer(modifier = Modifier.height(16.dp))
-
-                 TextButton(onClick = onNavigateToRegister) {
-                     Text(
-                         text = "¿No tienes una cuenta? Regístrate",
-                         color = MaterialTheme.colorScheme.onPrimary,
-                         fontSize = 15.sp,
-                         fontFamily = Poppins
-                     )
                  }
              }
          }

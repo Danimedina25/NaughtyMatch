@@ -201,7 +201,7 @@ fun RegisterScreen(
 
                 Button(
                     onClick = {
-                        loginViewModel.registerWithEmail(email, password)
+                        //loginViewModel.registerWithEmail(email, password)
                     },
                     modifier = Modifier
                         .fillMaxWidth()
